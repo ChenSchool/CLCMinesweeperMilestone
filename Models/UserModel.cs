@@ -22,7 +22,5 @@ namespace CLCMinesweeperMilestone.Models
 
         public string PasswordHash { get; set; }
 
-        public string Salt { get; set; }
-        public string Groups { get; set; }
     }
 }

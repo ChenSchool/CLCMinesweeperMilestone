@@ -25,11 +25,13 @@ namespace CLCMinesweeperMilestone.Controllers
         [HttpPost]
         public IActionResult Register(UserModel model)
         {
+
+
             if (ModelState.IsValid)
             {
                 
                 _context.Users.Add(model);
-                _context.SaveChanges();
+                _context.SaveChanges();         //BUG Currently hanging from a missing SQL server - Might be an issue with me not having one running?
 
                 // Redirect to a success page.
                 return RedirectToAction("RegisterSuccess");
