@@ -23,7 +23,6 @@ namespace CLCMinesweeperMilestone.Controllers
 
         // POST: /Account/Register
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Register(UserModel model)
         {
             if (ModelState.IsValid)
