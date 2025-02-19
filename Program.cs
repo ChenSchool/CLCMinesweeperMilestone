@@ -27,6 +27,15 @@ namespace CLCMinesweeperMilestone
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+            // Add the session services
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout
+                options.Cookie.HttpOnly = true; // Set the cookie to be HTTP only
+                options.Cookie.IsEssential = true; // Set the cookie to be essential
+            });
+
             // Build the app
             var app = builder.Build();
 
@@ -38,7 +47,9 @@ namespace CLCMinesweeperMilestone
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
             app.UseAuthorization();
 
             // If MapStaticAssets is a custom extension, ensure you have the correct using or extension method.

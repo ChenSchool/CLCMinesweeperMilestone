@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿/* UNUSED BUT KEEPING FILE JUST IN CASE */
+
+using Microsoft.AspNetCore.Mvc;
 using CLCMinesweeperMilestone.Models;
 using CLCMinesweeperMilestone.Database;
 
@@ -31,7 +33,7 @@ namespace CLCMinesweeperMilestone.Controllers
             {
                 
                 _context.Users.Add(model);
-                _context.SaveChanges();         //BUG Currently hanging from a missing SQL server - Might be an issue with me not having one running?
+                _context.SaveChanges();
 
                 // Redirect to a success page.
                 return RedirectToAction("RegisterSuccess");
