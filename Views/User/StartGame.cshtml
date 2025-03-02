@@ -1,23 +1,23 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<ButtonModel>
+
 @{
-
-    <h1>Minesweeper</h1>
-
-    string? user = Context.Session.GetString("User");
-
-    var userString = ServiceStack.Text.JsonSerializer.SerializeToString(user);
-    if (string.IsNullOrEmpty(user))
-    {
-        <p>You are not logged in</p>
-    }
-    else
-    {
-        <p>You are logged in as @userString</p>
-
-        <pre>@user</pre>
-    }
-        
-
+    ViewData["Title"] = "Game Board";
+    var boardSize = Context.Session.GetInt32("BoardSize") ?? 6;
+    var difficulty = Context.Session.GetString("Difficulty") ?? "Easy";
 }
+
+<h2 class="text-center">Minesweeper - Dungeon Delver</h2>
+<p class="text-center"><strong>Difficulty:</strong> @difficulty</p>
+<p class="text-center"><strong>Board Size:</strong> @boardSize x @boardSize</p>
+
+<!-- Game Board Container with Dynamic Grid -->
+<div class="game-board-container" data-board-size="@boardSize">
+    @foreach (var button in Model)
+    {
+        <button class="game-button" onclick="location.href='@Url.Action("ButtonClick", "User", new { id = button.Id })'">
+            <img src="~/images/@button.ButtonImage" alt="Tile">
+        </button>
+    }
+</div>
+
+<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings</a>

@@ -1,5 +1,3 @@
-using CLCMinesweeperMilestone.Database;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.IO; // For Directory.GetCurrentDirectory()
@@ -23,9 +21,7 @@ namespace CLCMinesweeperMilestone
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            // Register ApplicationDbContext with the connection string from appsettings.json
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+          
 
             // Add the session services
             builder.Services.AddDistributedMemoryCache();
