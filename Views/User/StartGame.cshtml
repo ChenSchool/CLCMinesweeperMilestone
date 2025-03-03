@@ -14,8 +14,8 @@
 <div class="game-board-container" data-board-size="@boardSize">
     @foreach (var button in Model)
     {
-        <button class="game-button" onclick="location.href='@Url.Action("ButtonClick", "User", new { id = button.Id })'">
-            <img src="~/images/@button.ButtonImage" alt="Tile">
+        <button class="game-button">
+            <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile">
         </button>
     }
 </div>
