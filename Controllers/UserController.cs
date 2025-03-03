@@ -7,7 +7,8 @@ namespace CLCMinesweeperMilestone.Controllers
 {
     public class UserController : Controller
     {
-        static UserCollection users = new UserCollection();
+        /*static UserCollection users = new UserCollection();*/
+        static UserDAO users = new UserDAO();
 
         // List to store button models
         static List<ButtonModel> buttons = new List<ButtonModel>();
