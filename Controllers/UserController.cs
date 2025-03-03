@@ -7,8 +7,8 @@ namespace CLCMinesweeperMilestone.Controllers
 {
     public class UserController : Controller
     {
-        /*static UserCollection users = new UserCollection();*/
-        static UserDAO users = new UserDAO();
+        static UserCollection users = new UserCollection();
+        /*static UserDAO users = new UserDAO();*/
 
         // List to store button models
         static List<ButtonModel> buttons = new List<ButtonModel>();
@@ -19,6 +19,16 @@ namespace CLCMinesweeperMilestone.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+        public IActionResult AddTestUser()
+        {
+            UserModel user1 = new UserModel();
+            user1.Username = "test1";
+            user1.SetPassword("test1");
+
+            users.AddUser(user1); // Ensure UserDAO has an AddUser method
+
+            return View("Index");
         }
 
         public IActionResult ProcessLogin(string UserName, string Password)
@@ -92,7 +102,6 @@ namespace CLCMinesweeperMilestone.Controllers
         // Action to start the game        
         public IActionResult StartGame()
         {
-  
             string difficulty = HttpContext.Session.GetString("Difficulty") ?? "Easy";
             int boardSize = HttpContext.Session.GetInt32("BoardSize") ?? 6;
             ViewBag.Difficulty = difficulty;
@@ -106,8 +115,8 @@ namespace CLCMinesweeperMilestone.Controllers
                 _ => 0.10
             };
 
-            // Reset the button list for a fresh game
-            buttons.Clear();
+            // ✅ Reset the button list for a fresh game
+            buttons = new List<ButtonModel>();
             Random rng = new Random();
 
             for (int i = 0; i < boardSize * boardSize; i++)
@@ -120,7 +129,6 @@ namespace CLCMinesweeperMilestone.Controllers
                 buttons.Add(new ButtonModel(i, tileType, buttonImages[tileType]));
             }
 
-            // Compute numbers for non-skull tiles
             ComputeTileNumbers(boardSize);
 
             return View("StartGame", buttons);
@@ -165,33 +173,35 @@ namespace CLCMinesweeperMilestone.Controllers
 
         public IActionResult ButtonClick(int id)
         {
-             // Find the button with the specified id  
-        ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
-        if (button == null || button.IsRevealed) return RedirectToAction("StartGame"); // Prevent unnecessary reloads
+            // Find the button with the specified id  
+            // Find the button with the specified id  
+            ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
+            if (button == null || button.IsRevealed)
+                return RedirectToAction("StartGame"); // Prevent unnecessary reloads
 
-        button.IsRevealed = true;
+            button.IsRevealed = true;
 
-        if (button.ButtonState == 3) // Skull (Game Over)
-        {
-        return RedirectToAction("Lose");
-        }
-    
-        if (button.ButtonState > 0 && button.ButtonState != 3) // Allow numbers to be revealed
-        {
-        button.IsRevealed = true; 
-        }
+            if (button.ButtonState == 3) // Skull (Game Over)
+            {
+                return RedirectToAction("Lose");
+            }
 
-         if (button.ButtonState == 0) // Empty tile (Reveal nearby)
-        {
-            RevealAdjacentTiles(id);
-        }
+            if (button.ButtonState > 0 && button.ButtonState != 3) // Numbered tile
+            {
+                button.IsRevealed = true;
+            }
 
-        if (CheckWinCondition()) // If all non-skull tiles are revealed, player wins
-        {
-        return RedirectToAction("Win");
-        }
+            if (button.ButtonState == 0) // Empty tile (Reveal adjacent)
+            {
+                RevealAdjacentTiles(id);
+            }
 
-        return View("StartGame"); // Keep board state without resetting
+            if (CheckWinCondition()) // Check win condition
+            {
+                return RedirectToAction("Win");
+            }
+
+            return View("StartGame", buttons); // ✅ Send updated board back to vie
 
         }
 
