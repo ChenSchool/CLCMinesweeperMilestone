@@ -165,10 +165,9 @@ namespace CLCMinesweeperMilestone.Controllers
 
         public IActionResult ButtonClick(int id)
         {
-            // Find the button with the specified id  
-        // Find the button with the specified id  
+             // Find the button with the specified id  
         ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
-        if (button == null || button.IsRevealed) return View("StartGame", buttons); // Don't reload board
+        if (button == null || button.IsRevealed) return RedirectToAction("StartGame"); // Prevent unnecessary reloads
 
         button.IsRevealed = true;
 
@@ -176,10 +175,15 @@ namespace CLCMinesweeperMilestone.Controllers
         {
         return RedirectToAction("Lose");
         }
-
-        if (button.ButtonState == 0) // Empty tile (Reveal nearby)
+    
+        if (button.ButtonState > 0 && button.ButtonState != 3) // Allow numbers to be revealed
         {
-        RevealAdjacentTiles(id);
+        button.IsRevealed = true; 
+        }
+
+         if (button.ButtonState == 0) // Empty tile (Reveal nearby)
+        {
+            RevealAdjacentTiles(id);
         }
 
         if (CheckWinCondition()) // If all non-skull tiles are revealed, player wins
@@ -187,42 +191,46 @@ namespace CLCMinesweeperMilestone.Controllers
         return RedirectToAction("Win");
         }
 
-        return View("StartGame", buttons); // Keep the board without resetting
+        return View("StartGame"); // Keep board state without resetting
 
         }
 
         private void RevealAdjacentTiles(int id)
         {
-            Queue<int> queue = new Queue<int>();
+               Queue<int> queue = new Queue<int>();
             queue.Enqueue(id);
 
+            int boardSize = (int)Math.Sqrt(buttons.Count);
+
             while (queue.Count > 0)
+        {
+        int currentId = queue.Dequeue();
+        ButtonModel button = buttons[currentId];
+
+        if (button.IsRevealed) continue; // Stop if already revealed
+
+        // Stop expanding if it's a numbered tile (ButtonState > 0 but not a skull)
+        if (button.ButtonState > 0 && button.ButtonState != 3) continue;
+
+        button.IsRevealed = true;
+
+        int row = currentId / boardSize;
+        int col = currentId % boardSize;
+        int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+        int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+        for (int i = 0; i < 8; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            int newIndex = newRow * boardSize + newCol;
+
+            if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
             {
-                int currentId = queue.Dequeue();
-                ButtonModel button = buttons[currentId];
-
-                if (button.ButtonState != 2 || button.IsRevealed) continue;
-
-                button.IsRevealed = true;
-
-                int boardSize = (int)Math.Sqrt(buttons.Count);
-                int row = currentId / boardSize;
-                int col = currentId % boardSize;
-                int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
-                int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
-
-                for (int i = 0; i < 8; i++)
-                {
-                    int newRow = row + dx[i];
-                    int newCol = col + dy[i];
-                    int newIndex = newRow * boardSize + newCol;
-
-                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
-                    {
-                        queue.Enqueue(newIndex);
-                    }
-                }
+                queue.Enqueue(newIndex);
             }
+        }
+        }
         }
         private bool CheckWinCondition()
         {
