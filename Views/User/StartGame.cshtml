@@ -1,4 +1,4 @@
-﻿@model List<ButtonModel>
+@model List<ButtonModel>
 
 @{
     ViewData["Title"] = "Game Board";
@@ -17,11 +17,11 @@
         <form method="post" asp-action="ButtonClick">
             <input type="hidden" name="id" value="@button.Id" />
             <button class="game-button">
-                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile">
+                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile"
+                     style="display: @(button.IsRevealed ? "inline" : "none");">
             </button>
         </form>
     }
 </div>
 
-<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings
-
+<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings</a>
