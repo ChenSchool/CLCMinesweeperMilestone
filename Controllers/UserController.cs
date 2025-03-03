@@ -166,29 +166,28 @@ namespace CLCMinesweeperMilestone.Controllers
         public IActionResult ButtonClick(int id)
         {
             // Find the button with the specified id  
+        // Find the button with the specified id  
+        ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
+        if (button == null || button.IsRevealed) return View("StartGame", buttons); // Don't reload board
+
+        button.IsRevealed = true;
+
+        if (button.ButtonState == 3) // Skull (Game Over)
         {
-            ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
-            if (button == null || button.IsRevealed) return RedirectToAction("StartGame");
-
-            button.IsRevealed = true;
-
-            if (button.ButtonState == 3) // Skull
-            {
-                return RedirectToAction("Lose");
-            }
-
-            if (button.ButtonState == 2) // Empty tile
-            {
-                RevealAdjacentTiles(id);
-            }
-
-            if (CheckWinCondition())
-            {
-                return RedirectToAction("Win");
-            }
-
-            return RedirectToAction("StartGame");
+        return RedirectToAction("Lose");
         }
+
+        if (button.ButtonState == 0) // Empty tile (Reveal nearby)
+        {
+        RevealAdjacentTiles(id);
+        }
+
+        if (CheckWinCondition()) // If all non-skull tiles are revealed, player wins
+        {
+        return RedirectToAction("Win");
+        }
+
+        return View("StartGame", buttons); // Keep the board without resetting
 
         }
 
