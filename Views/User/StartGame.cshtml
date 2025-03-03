@@ -14,10 +14,14 @@
 <div class="game-board-container" data-board-size="@boardSize">
     @foreach (var button in Model)
     {
-        <button class="game-button">
-            <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile">
-        </button>
+        <form method="post" asp-action="ButtonClick">
+            <input type="hidden" name="id" value="@button.Id" />
+            <button class="game-button">
+                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile">
+            </button>
+        </form>
     }
 </div>
 
-<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings</a>
+<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings
+

@@ -92,62 +92,147 @@ namespace CLCMinesweeperMilestone.Controllers
         // Action to start the game        
         public IActionResult StartGame()
         {
-            // Include logic to check the status of each button, Skull = Game Over, Gold = Good, Numbered = Number of Skulls touching the tile, Empty = No Skulls around (Fantasy Style Minesweeper because the original is a little boring IMHO)
-
-            string difficulty = HttpContext.Session.GetString("Difficulty") ?? "Easy"; // Default to Easy
-            int boardSize = HttpContext.Session.GetInt32("BoardSize") ?? 6; // Default to 6x6
+  
+            string difficulty = HttpContext.Session.GetString("Difficulty") ?? "Easy";
+            int boardSize = HttpContext.Session.GetInt32("BoardSize") ?? 6;
             ViewBag.Difficulty = difficulty;
             ViewBag.BoardSize = boardSize;
 
-            // Determine skull probability based on difficulty
             double skullProbability = difficulty switch
             {
-                "Easy" => 0.10,   // 10% Skulls
-                "Medium" => 0.25, // 25% Skulls
-                "Hard" => 0.40,   // 40% Skulls
+                "Easy" => 0.10,
+                "Medium" => 0.25,
+                "Hard" => 0.40,
                 _ => 0.10
             };
 
             // Reset the button list for a fresh game
             buttons.Clear();
-            int totalTiles = boardSize * boardSize;
+            Random rng = new Random();
 
-            for (int i = 0; i < totalTiles; i++)
+            for (int i = 0; i < boardSize * boardSize; i++)
             {
-                // This just generates random images in random places right now to have some sort of display ***NOT FINAL DELETE AFTER FINAL IMPLEMENTATION***
-                int randomIndex = RandomNumberGenerator.GetInt32(0, buttonImages.Length);
-                buttons.Add(new ButtonModel(i, randomIndex, buttonImages[randomIndex]));
-                /*
-                 * This could be used for the game logic to determine the number of skulls around a tile
-                 * 
-                 * int number = RandomNumberGenerator.GetInt32(0, 12);
+                int row = i / boardSize;
+                int col = i % boardSize;
 
                 // Assign skulls based on probability
-                if (RandomNumberGenerator.GetInt32(0, 100) < (skullProbability * 100))
-                {
-                    number = 3; // Skull index
-                }
-
-                buttons.Add(new ButtonModel(i, number, buttonImages[number]));*/
+                int tileType = rng.NextDouble() < skullProbability ? 3 : 0; // 3 = Skull, 0 = Empty
+                buttons.Add(new ButtonModel(i, tileType, buttonImages[tileType]));
             }
 
-            return View(/*Implement Game Board Logic first*/buttons);
+            // Compute numbers for non-skull tiles
+            ComputeTileNumbers(boardSize);
+
+            return View("StartGame", buttons);
         }
+        private void ComputeTileNumbers(int boardSize)
+        {
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                if (buttons[i].ButtonState == 3) continue; // Skip skulls
+
+                int row = i / boardSize;
+                int col = i % boardSize;
+                int skullCount = 0;
+
+                for (int j = 0; j < 8; j++)
+                {
+                    int newRow = row + dx[j];
+                    int newCol = col + dy[j];
+                    int newIndex = newRow * boardSize + newCol;
+
+                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
+                    {
+                        if (buttons[newIndex].ButtonState == 3)
+                        {
+                            skullCount++;
+                        }
+                    }
+                }
+
+                if (skullCount > 0)
+                {
+                    buttons[i].ButtonState = skullCount + 4; // Assign numbered state
+                    buttons[i].ButtonImage = buttonImages[buttons[i].ButtonState];
+                }
+            }
+        }
+
+
 
         public IActionResult ButtonClick(int id)
         {
             // Find the button with the specified id  
+        {
             ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
-            if (button != null)
+            if (button == null || button.IsRevealed) return RedirectToAction("StartGame");
+
+            button.IsRevealed = true;
+
+            if (button.ButtonState == 3) // Skull
             {
-                // Update the button state and image  
-                button.ButtonState = (button.ButtonState + 1) % 13;
-                button.ButtonImage = buttonImages[button.ButtonState];
+                return RedirectToAction("Lose");
             }
 
-            // Redirect to the Index action  
+            if (button.ButtonState == 2) // Empty tile
+            {
+                RevealAdjacentTiles(id);
+            }
+
+            if (CheckWinCondition())
+            {
+                return RedirectToAction("Win");
+            }
+
             return RedirectToAction("StartGame");
         }
+
+        }
+
+        private void RevealAdjacentTiles(int id)
+        {
+            Queue<int> queue = new Queue<int>();
+            queue.Enqueue(id);
+
+            while (queue.Count > 0)
+            {
+                int currentId = queue.Dequeue();
+                ButtonModel button = buttons[currentId];
+
+                if (button.ButtonState != 2 || button.IsRevealed) continue;
+
+                button.IsRevealed = true;
+
+                int boardSize = (int)Math.Sqrt(buttons.Count);
+                int row = currentId / boardSize;
+                int col = currentId % boardSize;
+                int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+                int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+                for (int i = 0; i < 8; i++)
+                {
+                    int newRow = row + dx[i];
+                    int newCol = col + dy[i];
+                    int newIndex = newRow * boardSize + newCol;
+
+                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
+                    {
+                        queue.Enqueue(newIndex);
+                    }
+                }
+            }
+        }
+        private bool CheckWinCondition()
+        {
+            int totalSafeTiles = buttons.Count(b => b.ButtonState != 3);
+            int revealedCount = buttons.Count(b => b.IsRevealed && b.ButtonState != 3);
+
+            return revealedCount == totalSafeTiles;
+        }
+        
         // win or lose logic here
         public IActionResult Lose()
         {
