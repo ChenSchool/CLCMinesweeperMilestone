@@ -13,7 +13,7 @@ namespace CLCMinesweeperMilestone.Controllers
         static List<ButtonModel> buttons = new List<ButtonModel>();
 
         // Array of button images
-        string[] buttonImages = ["Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png"];
+        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" };
 
         public IActionResult Index()
         {
@@ -113,7 +113,13 @@ namespace CLCMinesweeperMilestone.Controllers
 
             for (int i = 0; i < totalTiles; i++)
             {
-                int number = RandomNumberGenerator.GetInt32(0, 12);
+                // This just generates random images in random places right now to have some sort of display ***NOT FINAL DELETE AFTER FINAL IMPLEMENTATION***
+                int randomIndex = RandomNumberGenerator.GetInt32(0, buttonImages.Length);
+                buttons.Add(new ButtonModel(i, randomIndex, buttonImages[randomIndex]));
+                /*
+                 * This could be used for the game logic to determine the number of skulls around a tile
+                 * 
+                 * int number = RandomNumberGenerator.GetInt32(0, 12);
 
                 // Assign skulls based on probability
                 if (RandomNumberGenerator.GetInt32(0, 100) < (skullProbability * 100))
@@ -121,10 +127,10 @@ namespace CLCMinesweeperMilestone.Controllers
                     number = 3; // Skull index
                 }
 
-                buttons.Add(new ButtonModel(i, number, buttonImages[number]));
+                buttons.Add(new ButtonModel(i, number, buttonImages[number]));*/
             }
 
-            return View(/*Implement Game Board Logic first*/ buttons);
+            return View(/*Implement Game Board Logic first*/buttons);
         }
 
         public IActionResult ButtonClick(int id)
@@ -141,7 +147,18 @@ namespace CLCMinesweeperMilestone.Controllers
             // Redirect to the Index action  
             return RedirectToAction("StartGame");
         }
+        // win or lose logic here
+        public IActionResult Lose()
+        {
+            ViewBag.Message = "You hit a Skull! Game Over!";
+            return View();
+        }
 
+        public IActionResult Win()
+        {
+            ViewBag.Message = "Congratulations! You cleared the dungeon!";
+            return View();
+        }
         // Game Logic Here?
 
         [SessionCheckFilter]
