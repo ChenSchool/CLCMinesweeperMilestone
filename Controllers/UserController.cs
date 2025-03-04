@@ -244,7 +244,6 @@ namespace CLCMinesweeperMilestone.Controllers
             ViewBag.Message = "Congratulations! You cleared the dungeon!";
             return View();
         }
-        // Game Logic Here?
 
         [SessionCheckFilter]
         public IActionResult Logout()
