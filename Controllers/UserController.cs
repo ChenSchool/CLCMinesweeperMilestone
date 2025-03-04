@@ -173,12 +173,8 @@ namespace CLCMinesweeperMilestone.Controllers
 
         public IActionResult ButtonClick(int id)
         {
-            // Find the button with the specified id  
-            // Find the button with the specified id  
-            ButtonModel button = buttons.FirstOrDefault(b => b.Id == id);
-            if (button == null || button.IsRevealed)
-                return RedirectToAction("StartGame"); // Prevent unnecessary reloads
-
+            // Find the button with the specified id  e
+            ButtonModel button = buttons.ElementAt(id);
             button.IsRevealed = true;
 
             if (button.ButtonState == 3) // Skull (Game Over)
@@ -207,40 +203,26 @@ namespace CLCMinesweeperMilestone.Controllers
 
         private void RevealAdjacentTiles(int id)
         {
-               Queue<int> queue = new Queue<int>();
-            queue.Enqueue(id);
 
             int boardSize = (int)Math.Sqrt(buttons.Count);
 
-            while (queue.Count > 0)
-        {
-        int currentId = queue.Dequeue();
-        ButtonModel button = buttons[currentId];
+            int row = id / boardSize;
+            int col = id % boardSize;
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
 
-        if (button.IsRevealed) continue; // Stop if already revealed
-
-        // Stop expanding if it's a numbered tile (ButtonState > 0 but not a skull)
-        if (button.ButtonState > 0 && button.ButtonState != 3) continue;
-
-        button.IsRevealed = true;
-
-        int row = currentId / boardSize;
-        int col = currentId % boardSize;
-        int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
-        int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
-
-        for (int i = 0; i < 8; i++)
-        {
-            int newRow = row + dx[i];
-            int newCol = col + dy[i];
-            int newIndex = newRow * boardSize + newCol;
-
-            if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
+            for (int i = 0; i < 8; i++)
             {
-                queue.Enqueue(newIndex);
-            }
-        }
-        }
+                int newRow = row + dx[i];
+                int newCol = col + dy[i];
+                int newIndex = newRow * boardSize + newCol;
+
+                if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize)
+                {
+                    if (buttons[newIndex].IsRevealed) continue; // Skip if already revealed
+                    ButtonClick(newIndex);
+                }
+            }           
         }
         private bool CheckWinCondition()
         {
@@ -249,7 +231,7 @@ namespace CLCMinesweeperMilestone.Controllers
 
             return revealedCount == totalSafeTiles;
         }
-        
+
         // win or lose logic here
         public IActionResult Lose()
         {
