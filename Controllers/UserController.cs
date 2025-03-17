@@ -245,5 +245,24 @@ namespace CLCMinesweeperMilestone.Controllers
             HttpContext.Session.Remove("User");
             return View("Index");
         }
+        
+        [HttpPost]
+        public IActionResult ToggleFlag(int id)
+        {
+            // Get the button by ID
+            ButtonModel button = buttons[id];
+
+            // Toggle the flag state
+            button.IsFlagged = !button.IsFlagged;
+
+            // Update the button's image based on the flag state    
+            button.ButtonImage = button.IsFlagged ? "flag.png" : "Tile Flat.png";
+
+            // Return the updated game board as a partial view, passing the buttons model
+            return PartialView("_FlagGameBoardPartial", buttons);  // Pass 'buttons' to the partial view
+        }
+
+
+
     }
 }

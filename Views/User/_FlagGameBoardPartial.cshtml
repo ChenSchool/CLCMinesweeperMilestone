@@ -1,0 +1,8 @@
+﻿@model List<CLCMinesweeperMilestone.Models.ButtonModel>
+
+@foreach (var button in Model)
+{
+    <button class="game-button @(button.ButtonState == 3 ? "flagged" : "")" data-id="@button.Id">
+        <img src="/img/@button.ButtonImage" alt="Tile" />
+    </button>
+}
