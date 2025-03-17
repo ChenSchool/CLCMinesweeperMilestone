@@ -10,18 +10,46 @@
 <p class="text-center"><strong>Difficulty:</strong> @difficulty</p>
 <p class="text-center"><strong>Board Size:</strong> @boardSize x @boardSize</p>
 
-<!-- Game Board Container with Dynamic Grid -->
-<div class="game-board-container" data-board-size="@boardSize">
-    @foreach (var button in Model)
-    {
-        <form method="post" asp-action="ButtonClick">
-            <input type="hidden" name="id" value="@button.Id" />
-            <button class="game-button">
-                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile"
-                     style="display: @(button.IsRevealed ? "inline" : "none");">
-            </button>
-        </form>
-    }
+<!-- Timestamp Display -->
+<p class="text-center"><strong>Last Updated:</strong> <span id="timestamp"></span></p>
+
+<!-- Game Board -->
+<div id="game-board-container">
+    @await Html.PartialAsync("_GameBoardPartial", Model)
 </div>
 
-<a href="@Url.Action("DungeonDelver", "User")" class="btn btn-secondary">Change Settings</a>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).off("click", ".game-button").on("click", ".game-button", function (event) {
+                event.preventDefault();
+
+                var button = $(this);
+                var form = button.closest("form");
+                var formData = form.serialize();
+
+                $.post(form.attr("action"), formData)
+                    .done(function (data) {
+                        console.log("Response Data:", data); // Debugging
+
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl; // Redirect on Win/Loss
+                        } else if (typeof data === "string" && data.trim().length > 0) {
+                            $("#game-board-container").html(data); // Update the board dynamically
+
+                            var timestamp = new Date().toLocaleTimeString();
+                            $("#timestamp").text(timestamp);
+                        } else {
+                            console.error("Unexpected empty response");
+                        }
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error("AJAX Error:", textStatus, errorThrown);
+                        alert("Something went wrong. Please try again.");
+                    });
+            });
+        });
+    </script>
+}
+

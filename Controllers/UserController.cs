@@ -171,34 +171,28 @@ namespace CLCMinesweeperMilestone.Controllers
 
 
 
+        [HttpPost]
         public IActionResult ButtonClick(int id)
         {
-            // Find the button with the specified id  e
-            ButtonModel button = buttons.ElementAt(id);
+            ButtonModel button = buttons[id];
             button.IsRevealed = true;
 
-            if (button.ButtonState == 3) // Skull (Game Over)
+            if (button.ButtonState == 3) // If a skull is clicked, redirect to the Lose page
             {
-                return RedirectToAction("Lose");
+                return Json(new { redirectUrl = Url.Action("Lose") });
             }
 
-            if (button.ButtonState > 0 && button.ButtonState != 3) // Numbered tile
-            {
-                button.IsRevealed = true;
-            }
-
-            if (button.ButtonState == 0) // Empty tile (Reveal adjacent)
+            if (button.ButtonState == 0)
             {
                 RevealAdjacentTiles(id);
             }
 
-            if (CheckWinCondition()) // Check win condition
+            if (CheckWinCondition()) // If all non-skull tiles are revealed, redirect to Win
             {
-                return RedirectToAction("Win");
+                return Json(new { redirectUrl = Url.Action("Win") });
             }
 
-            return View("StartGame", buttons); // ✅ Send updated board back to vie
-
+            return PartialView("_GameBoardPartial", buttons);
         }
 
         private void RevealAdjacentTiles(int id)

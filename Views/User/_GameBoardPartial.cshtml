@@ -1,0 +1,18 @@
+﻿@model List<ButtonModel>
+
+@{
+    var boardSize = (int)Math.Sqrt(Model.Count); // Calculate board size from total buttons
+}
+
+<div class="game-board-container" data-board-size="@boardSize" style="--board-size: @boardSize;">
+    @foreach (var button in Model)
+    {
+        <form method="post" asp-action="ButtonClick" class="game-button-form">
+            <input type="hidden" name="id" value="@button.Id" />
+            <button type="submit" class="game-button">
+                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile"
+                     style="display: @(button.IsRevealed ? "inline" : "none");">
+            </button>
+        </form>
+    }
+</div>
