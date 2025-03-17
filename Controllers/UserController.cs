@@ -177,21 +177,15 @@ namespace CLCMinesweeperMilestone.Controllers
             ButtonModel button = buttons[id];
             button.IsRevealed = true;
 
-            if (button.ButtonState == 3) // If a skull is clicked, redirect to the Lose page
+            if (button.ButtonState == 3) // Skull
             {
+                // Return JSON that triggers a redirect to Lose page
                 return Json(new { redirectUrl = Url.Action("Lose") });
             }
 
-            if (button.ButtonState == 0)
-            {
-                RevealAdjacentTiles(id);
-            }
+            // Possibly reveal adjacent tiles, etc.
 
-            if (CheckWinCondition()) // If all non-skull tiles are revealed, redirect to Win
-            {
-                return Json(new { redirectUrl = Url.Action("Win") });
-            }
-
+            // Return updated partial
             return PartialView("_GameBoardPartial", buttons);
         }
 
@@ -218,6 +212,24 @@ namespace CLCMinesweeperMilestone.Controllers
                 }
             }           
         }
+        [HttpPost]
+        public IActionResult ToggleFlag([FromBody] FlagRequest request)
+        {
+            var button = buttons.FirstOrDefault(b => b.Id == request.ButtonId);
+            if (button != null && !button.IsRevealed) // Prevent flagging revealed tiles
+            {
+                button.IsFlagged = !button.IsFlagged; // Toggle flag
+                button.ButtonImage = button.IsFlagged ? "flag.png" : ""; // Update image
+            }
+            return Json(new { success = true, flagState = button?.IsFlagged });
+        }
+
+        // Helper class for JSON request
+        public class FlagRequest
+        {
+            public int ButtonId { get; set; }
+        }
+
         private bool CheckWinCondition()
         {
             int totalSafeTiles = buttons.Count(b => b.ButtonState != 3);

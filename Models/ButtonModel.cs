@@ -8,6 +8,8 @@
         public string ButtonImage { get; set; }
         public bool IsRevealed { get; set; } = false; // New property to track if the tile is revealed
 
+        public bool IsFlagged { get; set; } = false;
+
         public ButtonModel(int id, int buttonState, string buttonImg)
         {
             Id = id;
