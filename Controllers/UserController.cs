@@ -14,7 +14,7 @@ namespace CLCMinesweeperMilestone.Controllers
         static List<ButtonModel> buttons = new List<ButtonModel>();
 
         // Array of button images
-        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" };
+        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" , "flag.png" };
 
         public IActionResult Index()
         {
@@ -245,5 +245,27 @@ namespace CLCMinesweeperMilestone.Controllers
             HttpContext.Session.Remove("User");
             return View("Index");
         }
+        [HttpPost]
+        public IActionResult ToggleFlag(int id)
+        {
+            // Prevent out-of-bounds access
+            if (id < 0 || id >= buttons.Count)
+            {
+                return BadRequest("Invalid tile ID");
+            }
+
+            ButtonModel tile = buttons[id];
+
+            // ✅ Toggle the flag, but only if tile is NOT already revealed
+            if (!tile.IsRevealed)
+            {
+                tile.IsFlagged = !tile.IsFlagged;
+            }
+
+            // ✅ Return the updated board so it updates dynamically
+            return PartialView("_GameBoardPartial", buttons);
+        }
+
     }
+
 }

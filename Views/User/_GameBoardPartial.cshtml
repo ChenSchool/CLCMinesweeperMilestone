@@ -1,17 +1,32 @@
 ﻿@model List<ButtonModel>
 
 @{
-    var boardSize = (int)Math.Sqrt(Model.Count); // Calculate board size from total buttons
+    var boardSize = (int)Math.Sqrt(Model.Count); // Calculate board size
 }
 
-<div class="game-board-container" data-board-size="@boardSize" style="--board-size: @boardSize;">
+<div class="game-board-container" data-board-size="@boardSize">
     @foreach (var button in Model)
     {
         <form method="post" asp-action="ButtonClick" class="game-button-form">
             <input type="hidden" name="id" value="@button.Id" />
-            <button type="submit" class="game-button">
-                <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile"
-                     style="display: @(button.IsRevealed ? "inline" : "none");">
+            <button type="submit" class="game-button @(button.IsRevealed ? "revealed" : "") @(button.IsFlagged ? "flagged" : "")"
+                    data-id="@button.Id">
+
+                @if (button.IsFlagged)
+                {
+                    <!-- Show flag image when flagged -->
+                    <img src="@Url.Content("~/img/flag.png")" alt="Flag">
+                }
+                else if (button.IsRevealed)
+                {
+                    <!-- Show the actual tile (numbered, empty, skull, etc.) -->
+                    <img src="@Url.Content("~/img/" + button.ButtonImage)" alt="Tile">
+                }
+                else
+                {
+                    <!-- Show default hidden tile image -->
+                    <img src="@Url.Content("~/img/Tile Flat.png")" alt="Hidden Tile">
+                }
             </button>
         </form>
     }

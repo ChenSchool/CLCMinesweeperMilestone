@@ -21,25 +21,28 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
+               $(document).ready(function () {
+            // LEFT-CLICK: Reveal a tile
             $(document).off("click", ".game-button").on("click", ".game-button", function (event) {
                 event.preventDefault();
 
                 var button = $(this);
-                var form = button.closest("form");
-                var formData = form.serialize();
+                var tileId = button.data("id"); // Get tile ID
 
-                $.post(form.attr("action"), formData)
+                // Prevent clicking flagged tiles
+                if (button.hasClass("flagged")) {
+                    return;
+                }
+
+                $.post('/User/ButtonClick', { id: tileId })
                     .done(function (data) {
                         console.log("Response Data:", data); // Debugging
 
                         if (data.redirectUrl) {
-                            window.location.href = data.redirectUrl; // Redirect on Win/Loss
+                            window.location.href = data.redirectUrl; // Handle win/loss
                         } else if (typeof data === "string" && data.trim().length > 0) {
-                            $("#game-board-container").html(data); // Update the board dynamically
-
-                            var timestamp = new Date().toLocaleTimeString();
-                            $("#timestamp").text(timestamp);
+                            $("#game-board-container").html(data); // Update board dynamically
+                            $("#timestamp").text(new Date().toLocaleTimeString());
                         } else {
                             console.error("Unexpected empty response");
                         }
@@ -49,7 +52,33 @@
                         alert("Something went wrong. Please try again.");
                     });
             });
+
+            // RIGHT-CLICK: Toggle flag
+            $(document).on("contextmenu", ".game-button", function (e) {
+                e.preventDefault(); // Prevent default right-click menu
+
+                var tileId = $(this).data("id"); // Get tile ID
+
+                $.post('/User/ToggleFlag', { id: tileId })
+                    .done(function (data) {
+                        console.log("Flag Response:", data);
+
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl; // Handle win/loss
+                        } else if (typeof data === "string" && data.trim().length > 0) {
+                            $("#game-board-container").html(data); // Update board
+                            $("#timestamp").text(new Date().toLocaleTimeString());
+                        } else {
+                            console.error("Empty flag response");
+                        }
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error("ToggleFlag Error:", textStatus, errorThrown);
+                        alert("Flag toggle error. Please try again.");
+                    });
+            });
         });
+
     </script>
 }
 

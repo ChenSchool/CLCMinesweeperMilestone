@@ -260,9 +260,32 @@ label {
     box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.5);
 }
 
+/* === FIX FLAGGED TILE STYLING === */
 .game-button.flagged {
-    background-color: red;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 1);
+    background-color: #222; /* Match the hidden tile */
+    border: 2px solid #ffcc00; /* Keep gold outline */
+    box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.5);
+    position: relative;
 }
 
+    /* Make sure the flag image fits nicely */
+    .game-button.flagged img {
+        width: 90%;
+        height: 90%;
+        object-fit: contain;
+        filter: drop-shadow(0px 0px 5px rgba(255, 0, 0, 0.7)); /* Adds a subtle glow *
 
+    .game-button.flagged::after {
+        content: "";
+        background-image: url('/img/flag.png'); /* Ensure this path is correct */
+        background-size: cover;
+        background-position: center;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+
+    

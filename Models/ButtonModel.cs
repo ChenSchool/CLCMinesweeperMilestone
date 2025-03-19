@@ -7,6 +7,7 @@
         public int ButtonState { get; set; } // 0 = Empty, 1 = Revealed, 2-10 = Numbers, 3 = Skull
         public string ButtonImage { get; set; }
         public bool IsRevealed { get; set; } = false; // New property to track if the tile is revealed
+        public bool IsFlagged { get; internal set; }
 
         public ButtonModel(int id, int buttonState, string buttonImg)
         {
