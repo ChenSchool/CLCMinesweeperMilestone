@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using CLCMinesweeperMilestone.Filters;
 using CLCMinesweeperMilestone.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -86,10 +87,32 @@ namespace CLCMinesweeperMilestone.Controllers
 
         [SessionCheckFilter]
         public IActionResult DungeonDelver()
+=======
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
+using RegisterandLoginApp.Models;
+
+namespace RegisterandLoginApp.Controllers
+{
+    public class UserController : Controller
+    {
+        private readonly UsersDAO _usersDAO; // Declare the correct field
+
+        public UserController()
+        {
+            _usersDAO = new UsersDAO(); // Correct the instantiation of UsersDAO
+        }
+
+        // GET: /User/Login
+        public IActionResult Login()
+>>>>>>> 4fc9e1d (Upload Minesweeper project with database connection)
         {
             return View();
         }
 
+<<<<<<< HEAD
         [HttpPost]
         public IActionResult SelectGame(string difficulty, int boardSize)
         {
@@ -268,4 +291,131 @@ namespace CLCMinesweeperMilestone.Controllers
 
     }
 
+=======
+        // POST: /User/Login
+        [HttpPost]
+        public IActionResult Login(string username, string password)
+        {
+            var user = _usersDAO.GetUserByUsername(username);  // Retrieve user from database
+
+            // Validate password
+            if (user != null && _usersDAO.CheckPassword(password, user.PasswordHash, user.Salt))
+            {
+                // Store user info in session
+                HttpContext.Session.SetString("UserName", user.Username);
+                return RedirectToAction("Success");  // Redirect to Success page
+                HttpContext.Session.SetString("UserName", user.Username);  // Set session after login
+
+            }
+
+            ViewBag.ErrorMessage = "Invalid username or password.";  // Display error
+            return View();  // Return to Login view
+        }
+
+        // GET: /User/Success
+        public IActionResult Success()
+        {
+            // Retrieve the username from the session
+            var username = HttpContext.Session.GetString("UserName");
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction("Login");  // Redirect to login if no session found
+            }
+
+            // Get user details from the database
+            var user = _usersDAO.GetUserByUsername(username);
+
+            if (user != null)
+            {
+                ViewData["User"] = user;  // Pass user details to the view
+            }
+
+            return View();
+        }
+
+        // GET: /User/Register
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // GET: /User/Succes
+
+        // POST: /User/Register
+        [HttpPost]
+        public IActionResult Register(string username, string password)
+        {
+            if (ModelState.IsValid)
+            {
+                // Generate salt and password hash
+                var salt = GenerateSalt();
+                var passwordHash = _usersDAO.GenerateHash(password, salt);
+
+                // Insert user into database
+                using (var connection = new SqlConnection(@"Data Source=192.168.0.10,1433;Initial Catalog=Test;User ID=SA;Password=ZenawiHaile32;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
+                {
+                    connection.Open();
+                    var query = "INSERT INTO Users (Username, PasswordHash, Salt) VALUES (@Username, @PasswordHash, @Salt)";
+                    var command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                    command.Parameters.AddWithValue("@Salt", salt);
+
+                    command.ExecuteNonQuery();  // Execute insert
+                }
+
+                return RedirectToAction("Login");  // Redirect to Login page after successful registration
+            }
+
+            return View();  // Return to Register view if validation fails
+        }
+
+        public string GenerateHash(string password, byte[] salt)
+        {
+
+            using (var sha256 = SHA256.Create())
+            {
+                var saltedPassword = password + Convert.ToBase64String(salt);
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+                return Convert.ToBase64String(hashedBytes);  // Return hashed password
+            }
+        }
+
+        public bool CheckPassword(string enteredPassword, string storedHash, byte[] salt)
+        {
+            var enteredHash = GenerateHash(enteredPassword, salt);  // Hash the entered password
+            return storedHash == enteredHash;  // Compare stored hash with entered hash
+        }
+
+
+        private byte[] GenerateSalt()
+        {
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                var salt = new byte[16];
+                rng.GetBytes(salt);
+                return salt;  // Return the generated salt
+            }
+        }
+
+        // GET: /User/MembersOnly
+        public IActionResult MembersOnly()
+        {
+            // Check if the user is logged in by verifying the session
+            var username = HttpContext.Session.GetString("UserName");
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction("Login");  // Redirect to Login if no session found
+            }
+
+            var user = _usersDAO.GetUserByUsername(username);  // Get user data from the database
+            ViewData["UserName"] = user.Username;  // Pass the username to the view
+
+            return View();
+        }
+
+    }
+>>>>>>> 4fc9e1d (Upload Minesweeper project with database connection)
 }

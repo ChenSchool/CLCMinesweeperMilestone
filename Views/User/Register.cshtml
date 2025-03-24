@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@model CLCMinesweeperMilestone.Models.RegisterViewModel
 
 <div class="register-container">
@@ -68,3 +69,26 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+=======
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Register</h2>
+
+<form method="post" action="/User/Register">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+    </div>
+    <button type="submit">Register</button>
+</form>
+
+>>>>>>> 4fc9e1d (Upload Minesweeper project with database connection)

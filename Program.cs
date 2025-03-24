@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.IO; // For Directory.GetCurrentDirectory()
@@ -60,3 +61,42 @@ namespace CLCMinesweeperMilestone
         }
     }
 }
+=======
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+// Add session services to the container
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Customize as needed
+    options.Cookie.HttpOnly = true; // Make sure cookies are only accessible via HTTP
+    options.Cookie.IsEssential = true; // Ensure cookies are essential for sessions
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts(); // Ensure HSTS is used in production for HTTPS
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// Add session middleware to the pipeline
+app.UseSession();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+>>>>>>> 4fc9e1d (Upload Minesweeper project with database connection)

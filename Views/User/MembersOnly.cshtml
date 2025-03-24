@@ -1,0 +1,16 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Members Only";
+}
+
+<h2>Welcome to the Private Club, @ViewData["UserName"]</h2>
+<p>You are logged in as: @ViewData["UserName"]</p>
+<p>Here is your user information:</p>
+<ul>
+    <li>Username: @ViewData["UserName"]</li>
+    <li>Groups: Admin, Users</li>  <!-- You can adjust based on your model -->
+</ul>
+
+<p><a href="/User/Logout">Logout</a></p>
