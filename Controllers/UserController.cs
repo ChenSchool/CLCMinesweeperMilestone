@@ -26,7 +26,7 @@ namespace CLCMinesweeperMilestone.Controllers
             user1.Username = "test1";
             user1.SetPassword("test1");
 
-            users.AddUser(user1); // Ensure UserDAO has an AddUser method
+            users.AddUser(user1); 
 
             return View("Index");
         }
