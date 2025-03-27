@@ -2,6 +2,7 @@
 using CLCMinesweeperMilestone.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace CLCMinesweeperMilestone.Controllers
 {
@@ -10,8 +11,13 @@ namespace CLCMinesweeperMilestone.Controllers
         static UserCollection users = new UserCollection();
         /*static UserDAO users = new UserDAO();*/
 
+        static GameCollection games = new GameCollection();
+        /*static GameDAO games = new GameDAO();     //--NOT IMPLEMENTED YET--  */
+
         // List to store button models
         static List<ButtonModel> buttons = new List<ButtonModel>();
+
+
 
         // Array of button images
         string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" , "flag.png" };
@@ -265,6 +271,23 @@ namespace CLCMinesweeperMilestone.Controllers
             // ✅ Return the updated board so it updates dynamically
             return PartialView("_GameBoardPartial", buttons);
         }
+
+        [SessionCheckFilter]
+        public void saveGame()
+        {
+            string userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return;
+            }
+
+            UserModel user = JsonSerializer.Deserialize<UserModel>(userJson);
+
+            GameModel game = new GameModel(user.Id, DateTime.Now, buttons);
+
+            games.AddGame(game);
+        }
+
 
     }
 
