@@ -1,48 +1,78 @@
 ﻿@model IEnumerable<CLCMinesweeperMilestone.Models.GameModel>
 
 <div>
-    <a asp-action="DungeonDelver" class="btn btn-primary">Start New Game</a>        @*  --TODO add a bit more spacing around this.  *@
+    <a asp-action="DungeonDelver" class="btn btn-primary">Start New Game</a>
 </div>
 
 <table class="table">
     <thead>
         <tr>
-            <th>
-                User Id
-            </th>
-            <th>
-                Date Saved
-            </th>
-            <th>
-                Minefield
-            </th>
-            <th>
-                Actions
-            </th>
+            <th>User Id</th>
+            <th>Game Id</th>
+            <th>Date Saved</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
+                <td>@Html.DisplayFor(modelItem => item.userId)</td>
+                <td>@Html.DisplayFor(modelItem => item.gameId)</td>
+                <td>@Html.DisplayFor(modelItem => item.DateSaved)</td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.userId)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateSaved)
-                </td>
-                <td>
-                    <div style="display: grid; grid-template-columns: repeat(@Math.Sqrt(item.buttons.Count), 1fr);">
-                        @for (int i = 0; i < item.buttons.Count; i++)
-                        {
-                            <div>[ @item.buttons[i].ButtonState ]</div>
-                        }
-                    </div>
-                </td>
-                <td>
-                    @* @Html.ActionLink("Delete", "Delete", new { id=item.buttons })  --TODO Figure out how to properly delete the selected button list *@
+                    <button class="load-game-btn btn btn-info" data-gameid="@item.gameId">Load Game</button>
+                    <button class="delete-game-btn btn btn-danger" data-gameid="@item.gameId">Delete Game</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Handle Load Game button click
+         $(document).on("click", ".load-game-btn", function(e) {
+            e.preventDefault();
+            var gameId = $(this).data("gameid");
+            $.get('/api/DungeonDelver/showSavedGames/' + gameId)
+                .done(function(data) {
+                    if(data) {
+                        // Redirect to the LoadGame action that sets the active game and returns the StartGame view.
+                        window.location.href = '/User/LoadGame/?gameId=' + data.gameId;
+                    } else {
+                        alert("Error loading game");
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error("LoadGame error:", status, error);
+                });
+        });
+
+        // Handle Delete Game button click
+        $(document).on("click", ".delete-game-btn", function(e) {
+            e.preventDefault();
+            if(!confirm("Are you sure you want to delete this game?")) return;
+            var gameId = $(this).data("gameid");
+            $.ajax({
+                url: '/api/DungeonDelver/deleteOneGame/' + gameId,
+                type: 'DELETE'
+            })
+            .done(function(data) {
+                if(data.success) {
+                    alert("Game deleted");
+                    // Refresh the saved games list, by reloading the page.
+                    location.reload();
+                } else {
+                    alert("Error deleting game");
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error("DeleteGame error:", status, error);
+            });
+        });
+    </script>
+}
+
+

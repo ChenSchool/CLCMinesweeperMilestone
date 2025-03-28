@@ -18,15 +18,34 @@
     @await Html.PartialAsync("_GameBoardPartial", Model)
 </div>
 
-<div class="form-group d-flex justify-content-between">
-    <a href="@Url.Action("SaveGame","User")" class="btn btn-primary">Save Game</a>          @*  --TODO Format these to sit next to each other  *@
+<div class="form-group flex-row">
+    <a id="save-game-btn" href="#" class="btn btn-primary">Save Game</a>
     <a href="@Url.Action("Games","User")" class="btn btn-primary">Show Games</a>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-               $(document).ready(function () {
+        $(document).ready(function () {
+            // Save Game Button click via AJAX
+            $("#save-game-btn").click(function(e) {
+                e.preventDefault();  // Prevent default link behavior
+
+                $.post('/User/SaveGame')
+                    .done(function(data) {
+                        if(data.timestamp) {
+                            // Update the timestamp element with the returned timestamp
+                            $("#timestamp").text(data.timestamp);
+                        } else {
+                            console.error("No timestamp returned from server.");
+                        }
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error("Error saving game:", textStatus, errorThrown);
+                        alert("Error saving game. Please try again.");
+                    });
+            });
+
             // LEFT-CLICK: Reveal a tile
             $(document).off("click", ".game-button").on("click", ".game-button", function (event) {
                 event.preventDefault();
