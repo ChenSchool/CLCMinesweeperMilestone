@@ -1,0 +1,48 @@
+﻿@model IEnumerable<CLCMinesweeperMilestone.Models.GameModel>
+
+<div>
+    <a asp-action="DungeonDelver" class="btn btn-primary">Start New Game</a>        @*  --TODO add a bit more spacing around this.  *@
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                User Id
+            </th>
+            <th>
+                Date Saved
+            </th>
+            <th>
+                Minefield
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.userId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateSaved)
+                </td>
+                <td>
+                    <div style="display: grid; grid-template-columns: repeat(@Math.Sqrt(item.buttons.Count), 1fr);">
+                        @for (int i = 0; i < item.buttons.Count; i++)
+                        {
+                            <div>[ @item.buttons[i].ButtonState ]</div>
+                        }
+                    </div>
+                </td>
+                <td>
+                    @* @Html.ActionLink("Delete", "Delete", new { id=item.buttons })  --TODO Figure out how to properly delete the selected button list *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

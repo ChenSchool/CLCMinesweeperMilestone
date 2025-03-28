@@ -20,7 +20,7 @@ namespace CLCMinesweeperMilestone.Controllers
 
 
         // Array of button images
-        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" , "flag.png" };
+        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png", "flag.png" };
 
         public IActionResult Index()
         {
@@ -32,7 +32,7 @@ namespace CLCMinesweeperMilestone.Controllers
             user1.Username = "test1";
             user1.SetPassword("test1");
 
-            users.AddUser(user1); 
+            users.AddUser(user1);
 
             return View("Index");
         }
@@ -222,7 +222,7 @@ namespace CLCMinesweeperMilestone.Controllers
                     if (buttons[newIndex].IsRevealed) continue; // Skip if already revealed
                     ButtonClick(newIndex);
                 }
-            }           
+            }
         }
         private bool CheckWinCondition()
         {
@@ -251,6 +251,7 @@ namespace CLCMinesweeperMilestone.Controllers
             HttpContext.Session.Remove("User");
             return View("Index");
         }
+
         [HttpPost]
         public IActionResult ToggleFlag(int id)
         {
@@ -273,12 +274,12 @@ namespace CLCMinesweeperMilestone.Controllers
         }
 
         [SessionCheckFilter]
-        public void saveGame()
+        public IActionResult SaveGame()
         {
             string userJson = HttpContext.Session.GetString("User");
             if (string.IsNullOrEmpty(userJson))
             {
-                return;
+                return BadRequest();
             }
 
             UserModel user = JsonSerializer.Deserialize<UserModel>(userJson);
@@ -286,8 +287,19 @@ namespace CLCMinesweeperMilestone.Controllers
             GameModel game = new GameModel(user.Id, DateTime.Now, buttons);
 
             games.AddGame(game);
+            return View("StartGame", buttons);
         }
 
+        public IActionResult Games()
+        {
+            return View(games.GetAllGames());
+        }
+
+        public IActionResult DeleteGame(GameModel game)
+        {
+            games.DeleteGame(game);
+            return RedirectToAction("Games");
+        }
 
     }
 
