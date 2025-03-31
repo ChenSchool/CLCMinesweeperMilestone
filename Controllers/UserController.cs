@@ -3,19 +3,25 @@
 using CLCMinesweeperMilestone.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace CLCMinesweeperMilestone.Controllers
 {
     public class UserController : Controller
     {
-        static UserCollection users = new UserCollection();
-        /*static UserDAO users = new UserDAO();*/
+        /*static UserCollection users = new UserCollection();*/
+        static UserDAO users = new UserDAO();
+
+        /*static GameCollection games = new GameCollection();*/
+        static GameDAO games = new GameDAO();     
 
         // List to store button models
         static List<ButtonModel> buttons = new List<ButtonModel>();
 
+
+
         // Array of button images
-        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png" , "flag.png" };
+        string[] buttonImages = { "Tile 1.png", "Tile 2.png", "Tile Flat.png", "Skull.png", "Gold.png", "Number 1.png", "Number 2.png", "Number 3.png", "Number 4.png", "Number 5.png", "Number 6.png", "Number 7.png", "Number 8.png", "flag.png" };
 
         public IActionResult Index()
         {
@@ -27,7 +33,7 @@ namespace CLCMinesweeperMilestone.Controllers
             user1.Username = "test1";
             user1.SetPassword("test1");
 
-            users.AddUser(user1); // Ensure UserDAO has an AddUser method
+            users.AddUser(user1);
 
             return View("Index");
         }
@@ -125,6 +131,8 @@ namespace RegisterandLoginApp.Controllers
         // Action to start the game        
         public IActionResult StartGame()
         {
+            HttpContext.Session.Remove("LoadedGameId");
+
             string difficulty = HttpContext.Session.GetString("Difficulty") ?? "Easy";
             int boardSize = HttpContext.Session.GetInt32("BoardSize") ?? 6;
             ViewBag.Difficulty = difficulty;
@@ -239,7 +247,7 @@ namespace RegisterandLoginApp.Controllers
                     if (buttons[newIndex].IsRevealed) continue; // Skip if already revealed
                     ButtonClick(newIndex);
                 }
-            }           
+            }
         }
         private bool CheckWinCondition()
         {
@@ -268,6 +276,7 @@ namespace RegisterandLoginApp.Controllers
             HttpContext.Session.Remove("User");
             return View("Index");
         }
+
         [HttpPost]
         public IActionResult ToggleFlag(int id)
         {
@@ -288,6 +297,95 @@ namespace RegisterandLoginApp.Controllers
             // ✅ Return the updated board so it updates dynamically
             return PartialView("_GameBoardPartial", buttons);
         }
+
+        [SessionCheckFilter]
+        public IActionResult SaveGame()
+        {
+            string userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return BadRequest();
+            }
+            UserModel user = JsonSerializer.Deserialize<UserModel>(userJson);
+
+            // Check if a loaded game exists in session.
+            int? loadedGameId = HttpContext.Session.GetInt32("LoadedGameId");
+
+            if (loadedGameId.HasValue)
+            {
+                // Find the game with that id for the current user.
+                var existingGame = games.GetAllGames()
+                                        .FirstOrDefault(g => g.gameId == loadedGameId.Value && g.userId == user.Id);
+                if (existingGame != null)
+                {
+                    // Overwrite the existing game: update its properties.
+                    existingGame.DateSaved = DateTime.Now;
+                    existingGame.buttons = buttons;
+                    // If your collection does not support in-place updating, remove and re-add.
+                    games.DeleteGame(existingGame);
+                    games.AddGame(existingGame);
+                }
+                else
+                {
+                    // If no matching game is found, treat it as a new game.
+                    var allGames = games.GetAllGames();
+                    int newGameId = allGames.Any() ? allGames.Max(g => g.gameId) + 1 : 1;
+                    GameModel game = new GameModel(user.Id, newGameId, DateTime.Now, buttons);
+                    games.AddGame(game);
+                    HttpContext.Session.SetInt32("LoadedGameId", newGameId);
+                }
+            }
+            else
+            {
+                // No loaded game in session: this is a new game.
+                var allGames = games.GetAllGames();
+                int newGameId = allGames.Any() ? allGames.Max(g => g.gameId) + 1 : 1;
+                GameModel game = new GameModel(user.Id, newGameId, DateTime.Now, buttons);
+                games.AddGame(game);
+                // Save the new game id in session so that subsequent saves update this game.
+                HttpContext.Session.SetInt32("LoadedGameId", newGameId);
+            }
+
+            return View("StartGame", buttons);
+        }
+
+
+        public IActionResult Games()
+        {
+            var sortedGames = games.GetAllGames().OrderBy(g => g.gameId);
+            return View(sortedGames);
+        }
+
+        [HttpPost]
+        public IActionResult DeleteGame(int gameId)
+        {
+            var game = games.GetAllGames().FirstOrDefault(g => g.gameId == gameId);
+            if (game != null)
+            {
+                games.DeleteGame(game);
+            }
+            return RedirectToAction("Games");
+        }
+
+        public IActionResult LoadGame(int gameId)
+        {
+            var game = games.GetAllGames().FirstOrDefault(g => g.gameId == gameId);
+            if (game != null)
+            {
+                buttons = game.buttons;
+                HttpContext.Session.SetInt32("LoadedGameId", gameId);
+                return View("StartGame", buttons);
+            }
+            return NotFound();
+        }
+
+
+        /*public static GameCollection GetGameCollection()
+        {
+            return games;
+        }*/
+
+
 
     }
 

@@ -7,7 +7,8 @@ namespace CLCMinesweeperMilestone.Models
 {
     public class UserDAO : IUserManager
     {
-        string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Milestone;Integrated Security=True;Connect Timeout=30;Encrypt=False";
+        string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Milestone;Integrated Security=True;Connect Timeout=30;Encrypt=False";    //Chris's connection string
+        // TODO - Add your connection string here
 
         public int AddUser(UserModel user)
         {
