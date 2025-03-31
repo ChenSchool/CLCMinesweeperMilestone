@@ -8,11 +8,11 @@ namespace CLCMinesweeperMilestone.Controllers
 {
     public class UserController : Controller
     {
-        static UserCollection users = new UserCollection();
-        /*static UserDAO users = new UserDAO();*/
+        /*static UserCollection users = new UserCollection();*/
+        static UserDAO users = new UserDAO();
 
-        static GameCollection games = new GameCollection();
-        /*static GameDAO games = new GameDAO();     //--NOT IMPLEMENTED YET--  */
+        /*static GameCollection games = new GameCollection();*/
+        static GameDAO games = new GameDAO();     
 
         // List to store button models
         static List<ButtonModel> buttons = new List<ButtonModel>();
@@ -355,10 +355,12 @@ namespace CLCMinesweeperMilestone.Controllers
             }
             return NotFound();
         }
-        public static GameCollection GetGameCollection()
+
+
+        /*public static GameCollection GetGameCollection()
         {
             return games;
-        }
+        }*/
 
 
 

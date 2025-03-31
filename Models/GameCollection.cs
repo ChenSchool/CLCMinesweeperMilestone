@@ -10,9 +10,10 @@ namespace CLCMinesweeperMilestone.Models
             _games = new List<GameModel>();
         }
 
-        public void AddGame(GameModel game)
+        public int AddGame(GameModel game)
         {
             _games.Add(game);
+            return game.gameId;
         }
 
         public void DeleteGame(GameModel game)

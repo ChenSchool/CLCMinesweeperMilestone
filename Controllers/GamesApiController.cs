@@ -10,7 +10,8 @@ namespace CLCMinesweeperMilestone.Controllers
     {
         // For demonstration purposes, we use the same static collection.
         // In a real app, consider dependency injection for shared data.
-        private static GameCollection games = UserController.GetGameCollection();
+        //private static GameCollection games = UserController.GetGameCollection();
+        private GameDAO games = new GameDAO();
 
         // GET /api/showSavedGames
         [HttpGet("showSavedGames")]
